@@ -33,9 +33,19 @@ And the two encoder are for scrolling media and , like youtube and stuff and wit
 
 ---
 
+## 3D model 
+
+i made these two modles 
+
+[timelapse](https://lapse.hackclub.com/timelapse/egNmAstsQU08)
+
+
+
+---
+
 ## Assembly 
 
-okay soo first print the lid and base files 
+okay soo first print the 2*nob , lid and base files 
 
 then put the switchs and encoder through the lid , all the switchs snap into place and the encoder screws into the holes then just have a common ground wire and solder them togather 
 
