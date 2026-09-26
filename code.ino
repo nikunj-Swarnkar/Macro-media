@@ -106,6 +106,92 @@ void loop()
     }
     for (int i = 0; i< 2; i++)
     {
-        if 
+        if (digitalRead(ENCODER_BIN_PINS[i])== LOW)
+        {
+            delay(30);
+            if (digitalRead(ENCODER_BIN_PINS[i])== LOW)
+            {
+                handleEncoderClick(i);
+                while(digitalRead(ENCODER_BTN_PINS[i]) == LOW) delay(10);
+                activityDetected = true;
+            }
+        }
+    }
+    if (activityDetected)
+    {
+        lastActivityTime = millis();
+    }
+    if (millis() - lastActivityTime > SLEEP_TIMEOUT)
+    {
+        goToSleep();
+    }
+    delay(2);
+
+}
+void goToSleep()
+{
+    Serial.println("Going to sleep...");
+    if (bleKeyboard.isConnected())
+    {
+        bleKeyboard.releaseAll();
+    }
+     delay(100);
+    uint64_t wakeupBinMask = 0;
+    for (int i = 0; i < NUM_SWITCHES; i++)
+    {
+        wakeupBinMask |= (1ULL << SWITCH_PINS[i]);
+        rtc_gpio_pullup_en((gpio_num_t)SWITCH_PINS[i]);
+        rtc_gpio_pulldown_dis((gpio_num_t)SWITCH_PINS[i]);
+    }
+    wakeupBinMask |= (1ULL << ENCODER_BTN_PINS[0]);
+    rtc_gpio_pullup_en((gpio_num_t)ENCODER_BTN_PINS[0]);
+    rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_BTN_PINS[0]);
+
+    wakeupBinMask |= (1ULL << ENCODER_BTN_PINS[1]);
+    rtc_gpio_pullup_en((gpio_num_t)ENCODER_BTN_PINS[1]);
+    rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_BTN_PINS[1]);
+    esp_sleep_enable_ext1_wakeup(wakeupBinMask, ESP_EXT1_WAKEUP_ANY_HIGH);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+    esp_deep_sleep_start();
+}  
+void handleSwitchPress(uint8_t switchNum)
+{
+    if (!blekeyboard.isConnected()) return;
+    switch (switchNum)
+    {
+        case 0:
+            blekeyboard.write(KEY_MEDIA_NEXT_TRACK);
+            break;
+        case 1:
+            blekeyboard.write(KEY_MEDIA_PLAY_PAUSE);
+            break;
+        case 2:
+            blekeyboard.write(KEY_MEDIA_PREV_TRACK);
+            break;
+        case 3:
+            blekeyboard.write(KEY_RIGHT_ARROW);
+            break;
+        case 4:
+            blekeyboard.press(KEY_LEFT_GUI);
+            blekeyboard.press('d');
+            delay(50);
+            blekeyboard.releaseAll();
+            break;
+        case 5:
+            blekeyboard.write(KEY_LEFT_ARROW);
+            break;
+    }
+}
+void handleEncoderClick(int encoderNum)
+{
+    if(!blekeyboard.isConnected()) return;
+    switch (encoderNum)
+    {
+        case 0:
+            blekeyboard.write(KEY_MEDIA_MUTE);
+            break;
+        case 1:
+            blekeyboard.write(KEY_ESC);
+            break;
     }
 }
